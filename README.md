@@ -1,4 +1,4 @@
-![DeepSeek BugHunter](assets/banner-v2.svg)
+![DeepSeek BugHunter](assets/banner.jpeg)
 
 # DeepSeek BugHunter
 
