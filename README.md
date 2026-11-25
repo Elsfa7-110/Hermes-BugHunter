@@ -20,14 +20,11 @@ Skills are plain `SKILL.md` directories. Hermes Agent discovers skills from `~/.
 ## Copy the skills into Hermes (Linux)
 
 From the extracted repository directory on Linux:
-
 ```bash
-mkdir -p ~/.hermes/skills
-cp -a skills/. ~/.hermes/skills/
+cd ./hermes/skills
+git clone https://github.com/Elsfa7-110/DeepSeek-BugHunter.git
 ```
-
-
-Start a new Hermes session after copying. This repository does **not** select a model, configure a provider, request an API key, or modify your Hermes profile. It uses the model and tools already configured in Hermes.
+Start a new Hermes session
 
 An optional copy-only helper is also included:
 
