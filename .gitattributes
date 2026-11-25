@@ -1,2 +1,19 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Normalize line endings so shell/Python entrypoints stay LF on every platform.
+# Keep executable entrypoints on LF so Bash shebangs work reliably on Linux.
+* text=auto eol=lf
+
+# Executable text MUST be LF regardless of platform.
+*.sh   text eol=lf
+*.py   text eol=lf
+*.bash text eol=lf
+
+# Treat known binary assets as binary (no eol munging).
+*.svg  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.cast binary
+*.woff2 binary
+*.woff  binary

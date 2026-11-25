@@ -1,0 +1,299 @@
+# `cbh` — DeepSeek BugHunter command-line tools
+
+> **Hermes skills are the primary conversational interface.** In a Hermes session, use `/recon`, `/hunt`, `/triage`, `/report`, `/validate`, `/chain`, `/autopilot`, `/scope`, and related skill commands. The skills use the model and tools already configured in your Hermes profile.
+>
+> `cbh` is the optional deterministic command-line interface. Use it outside a Hermes conversation for repeatable passive recon, scope processing, classification, structured triage, and lab verification.
+>
+> **Run it from a repository checkout:**
+> - `python3 scripts/cbh.py <command>` uses the live `skills/` tree and repository data.
+> - `pipx install .` from the repository root installs the standalone `cbh` command with its bundled skill index.
+>
+> The CLI is separate from skill discovery. Copying `skills/` to `~/.hermes/skills/` is sufficient to use the skills in Hermes; the CLI and optional MCP integrations are not required.
+>
+> Regenerate the bundled index after editing skills: `python3 scripts/gen_skill_index.py`.
+
+## When to use `cbh` vs skills
+
+| Use case | Use this |
+|---|---|
+| Conversational hunting with reasoning and skill references | **Slash commands** in Hermes (`/hunt`, `/triage`, etc.) |
+| Building a chain across multiple primitives | **Slash commands** — the Hermes session retains working context |
+| Scheduled or scripted recon | **`cbh`** — deterministic exit codes and structured output |
+| Bulk passive recon | **`cbh recon`** — deterministic host discovery and HTTP probing |
+| Reproducible local-lab checks | **`cbh`** — repeatable commands and output |
+| Reading the methodology without loading a Hermes session | Browse `skills/` and `docs/` directly |
+| Triage gate and pre-submit checks | **`cbh triage`** — deterministic checks against the 7-Question Gate |
+
+The two interfaces share the same methodology but have different execution models. Use the conversational skills for model-assisted analysis and the CLI for deterministic operations.
+
+## Operating modes for the CLI
+
+> Stdlib + optional `subfinder` for richer recon. No build step.
+>
+> **Two HTTP-routing modes** within the CLI — pick what fits your setup:
+> 1. **Curl-only (default)** — stdlib HTTP, no Burp dependency. Works on any laptop with Python 3.9+.
+> 2. **Burp Suite integration** — `--burp` flag routes everything through Burp's proxy (default `127.0.0.1:8080`). Requests + responses land in Proxy → HTTP history; you can send any of them to Repeater/Intruder/Scanner/Collaborator. Pairs with the **Burp MCP server** (port 9876) for Hermes-conversational hunting.
+
+## Install
+
+```bash
+# Symlink the script to PATH on Linux
+chmod +x scripts/cbh.py
+ln -sf "$(pwd)/scripts/cbh.py" /usr/local/bin/cbh
+
+# Verify
+cbh --help
+```
+
+Or run inline from a repo checkout:
+
+```bash
+scripts/cbh.py --help
+```
+
+## Operating modes
+
+### Mode 1 — Curl-only (default)
+
+Works out of the box. All HTTP goes via Python `urllib`. No Burp required.
+
+```bash
+cbh recon hackerone.com
+cbh classify "https://api.target.com/v1/users/42?next=..."
+```
+
+### Mode 2 — Burp Suite Pro integration
+
+Two integration points:
+
+**A. `--burp` flag — proxy routing.** Routes every HTTP request `cbh` makes through Burp's proxy. Every request + response shows up in Burp Proxy → HTTP history with full reqs/resps captured for replay.
+
+```bash
+# Start Burp Suite Pro, ensure Proxy listener is on 127.0.0.1:8080
+cbh recon hackerone.com --burp
+cbh classify "https://target.com/api/users/42" --burp
+
+# Or use a custom proxy URL (Burp on a different port, mitmproxy, ZAP, etc.)
+cbh recon hackerone.com --proxy http://127.0.0.1:8081
+
+# Or set the env var once
+export CBH_BURP_PROXY=http://127.0.0.1:8080
+cbh recon target.com   # auto-detected
+```
+
+What happens after: every host `cbh recon` probes appears in Burp's Target → Site map. Each title-extracted live host is one click from Repeater. You drive the actual attacks from Burp; `cbh` did the bulk discovery + classification.
+
+**B. Burp MCP — optional conversational request replay via Hermes Agent.** If you've installed the Burp MCP server BApp extension (typical port `127.0.0.1:9876`), register its stdio bridge in Hermes using the documented `hermes mcp add` command or a `mcp_servers` entry in `~/.hermes/config.yaml`. For a local Java bridge, the equivalent YAML shape is:
+
+```yaml
+mcp_servers:
+  burp:
+    command: "java"
+    args: ["-jar", "~/.BurpSuite/mcp-proxy/mcp-proxy-all.jar"]
+```
+
+After configuring the optional server and starting a new Hermes session, a request can be sent for analysis:
+
+```
+You:  cbh classified /api/users/42 as IDOR-prone. Send it to Burp Repeater
+      with X-User-Id: 99 swapped in.
+LLM:  [uses Burp MCP tool calls: get last response, send to Repeater with
+       header swap, returns the new response]
+You:  Looks like cross-tenant read. Apply triage-validation 7-Question Gate.
+LLM:  [reads hunt-idor + triage-validation skills, runs 7Q against the
+       captured req/resp pair, returns PASS/DOWNGRADE/KILL]
+```
+
+This mode is the most ergonomic — the LLM drives Burp via MCP while consulting the skill content. `cbh` and Burp MCP are complementary: `cbh` is fast at bulk classification + structured triage; Burp MCP is fast at deep individual-request analysis.
+
+### When to use which mode
+
+| Phase | Curl-only | Burp proxy | Burp MCP |
+|---|---|---|---|
+| Recon (bulk subdomain + HTTP probe of 50+ hosts) | ✓ fastest | ✓ + audit trail | overkill |
+| Single-URL classification | ✓ | ✓ + traffic captured | ✓ (conversational) |
+| Detailed request manipulation (header swap, body fuzz, Intruder) | painful | ✓ (Repeater/Intruder) | ✓ (LLM-driven) |
+| Triage + report drafting | ✓ | ✓ | ✓ |
+| Discipline-rule enforcement (OOB gate, marker discipline, body-diff) | manual | manual | ✓ (LLM can apply the rules) |
+
+**Operator default:** `--burp` mode if Burp Suite Pro is open; curl-only mode otherwise. Burp MCP mode for engagements where you want maximum LLM-driven workflow inside Hermes Agent.
+
+---
+
+## The subcommands
+
+### `cbh recon <target>` — passive recon + live-host probe
+
+```bash
+cbh recon hackerone.com
+```
+
+Pipeline (in order):
+
+1. **Passive subdomain enumeration** — `crt.sh` certificate transparency (always, no key needed) + `subfinder` (if installed) merged + deduplicated.
+2. **DNS resolution** — stdlib `socket.getaddrinfo()` for predictable DNS resolution without invoking a separate resolver binary.
+3. **HTTP probe** — concurrent (10 threads) `urllib.request` → status code, Server header, X-Powered-By, X-Drupal-Cache, and `<title>` extraction. Redirects are recorded by their first response status without requesting the destination.
+4. **Summary** — writes `recon/<target>/RECON_SUMMARY.md` with the live-host table and a "Suggested next moves" pointer to `classify`.
+
+Outputs:
+- `recon/<target>/subdomains.txt`
+- `recon/<target>/resolved.txt`
+- `recon/<target>/live-hosts.json`
+- `recon/<target>/RECON_SUMMARY.md`
+- `recon/<target>/manifest.json` — the **recon→hunt handoff contract** ([`docs/recon-manifest.md`](recon-manifest.md))
+
+### `cbh surface <target>` — ranked attack surface from the recon manifest
+
+```bash
+cbh surface hackerone.com
+```
+
+Reads `recon/<target>/manifest.json` and prints the ranked **P1 / P2 / Kill** surface
+(api/auth/admin hosts → P1; static/CDN → Kill). The same manifest is what `hunt <target>`
+ingests to seed `scope.md` + `notes.md`, and what the `offensive-osint` skill appends
+secrets / identity-fabric data to. This is the deterministic backing for the `/surface`
+slash command. See [`docs/recon-manifest.md`](recon-manifest.md) for the full contract.
+
+### `cbh classify <url>` — pattern-match URL → hunt-* skills
+
+```bash
+cbh classify "https://api.target.com/v1/users/42?next=https://evil.com"
+```
+
+Two-stage matcher:
+
+1. **URL-pattern triggers** (high confidence) — 18 hand-curated regexes mapping URL shapes to `hunt-*` skill names. Examples:
+   - `[?&](url|next|redirect|return)=` → `hunt-ssrf`
+   - `/api/users/{id}` → `hunt-idor` + `hunt-api-misconfig`
+   - `/graphql` → `hunt-graphql`
+   - `/oauth/(authorize|token|callback)` → `hunt-oauth`
+   - `/_layouts/15/` or `/_vti_bin/` → `hunt-sharepoint`
+   - `/functionRouter` → `hunt-rce` + `hunt-ssti` (Spring Cloud Function CVE-2022-22963)
+   - `/cli` or `/jnlpJars` → `hunt-rce` (Jenkins CVE-2024-23897)
+2. **Description-keyword match** (lower confidence) — keyword overlap against each skill's `description:` frontmatter.
+
+Output includes a pointer to the matched skill's Pattern Library doc in `docs/disclosed-reports/<skill>.md` when one exists.
+
+### `cbh triage <finding.md>` — 7-Question Gate
+
+```bash
+cbh triage findings/idor-2026-05-15.md
+```
+
+Runs all 7 questions from the `triage-validation` skill against the finding text. Returns:
+
+- **PASS** — all 7 answered with evidence. Eligible for `cbh report`.
+- **DOWNGRADE** — failed Q2 (severity) or Q5 (duplication) only. Continue with tempered severity claim.
+- **KILL** — failed multiple questions OR Q7 matched the never-submit list (self-XSS, missing security headers, etc.). Per `triage-validation` discipline: do not draft the report.
+
+The gate matches keyword signals per question; absence-of-evidence is treated as "not answered". This catches the most common Phase 2D-verified FP shapes:
+
+- Q1 missing curl/POST/GET → finding wasn't actually tested
+- Q6 missing "leaked / exfiltrated / oob callback" → impact is "technically possible" only
+- Q7 hit on "self-xss / rate-limit only / clickjacking" → automatic KILL
+
+### `cbh report <finding.md> [--platform h1|hackerone|bugcrowd|intigriti|immunefi] [--reporter handle] [--out path]`
+
+```bash
+cbh report findings/idor-2026-05-15.md --platform bugcrowd --out submissions/h1-draft.md
+```
+
+`--platform hackerone` is an alias of `h1`. The **Reporter** line comes from `--reporter`, else the `CBH_REPORTER` environment variable, else a `(your handle)` placeholder — it never uses your OS login name.
+
+Parses the finding's YAML frontmatter + section headings, emits a platform-specific draft:
+
+- **H1** — common template; CVSS optional.
+- **Bugcrowd** — adds VRT mapping + severity-request paragraph (per `bugcrowd-reporting` skill).
+- **Intigriti** — common template + CVSS 3.1 vector slot.
+- **Immunefi** — Foundry-PoC-required structure; `forge test --match-test` invocation pre-filled.
+
+The draft will have `(fill in)` placeholders wherever the finding text didn't include the relevant section. **The CLI never invents content** — the operator owns each placeholder.
+
+### `cbh scope import <program> [-o scope.md]` — program scope → `scope.md`
+
+```bash
+cbh scope import h1:acme -o ~/Targets/acme/scope.md          # HackerOne
+cbh scope import bugcrowd:acme-mbb -o scope.md                # Bugcrowd (engagement slug)
+cbh scope import intigriti:acme/acmebbp -o scope.md           # Intigriti (company/handle)
+cbh scope import https://yeswehack.com/programs/acme          # a program URL works too; no -o prints
+cbh scope import --json acme-scope.json -o scope.md           # HackerOne MCP output (private programs)
+pbpaste | cbh scope import --text - --name acme -o scope.md   # pasted program-page text
+```
+
+Fills the `## In scope` / `## Out of scope` sections that `engine/scope.py` (and `/scope`)
+enforce. Public programs come from [bounty-targets-data](https://github.com/arkadiyt/bounty-targets-data),
+an hourly MIT-licensed dump of HackerOne, Bugcrowd, Intigriti and YesWeHack scopes; the file is
+cached for 6 hours under `~/.cache/deepseek-bughunter/` (`--refresh` to force, `--data FILE` to use
+a local copy, `CBH_CACHE_DIR` to move the cache). No API key is needed. For a private HackerOne
+program, save the HackerOne MCP server's `get_my_program` (or `get_program_scope`) result to a
+file and pass it with `--json`.
+
+The importer **fails closed** — the scope gate is what the unattended engine trusts:
+
+| Program asset | Becomes |
+|---|---|
+| `app.example.com`, `https://app.example.com:8443/` | `re:^app\.example\.com$` — an exact-host rule. A bare `app.example.com` rule would also admit every subdomain. |
+| `*.example.com`, `http://*.example.com/*` | `*.example.com` (subdomains; the apex only if listed) |
+| `203.0.113.7`, `203.0.113.0/24`, `2001:db8::/48`, `198.51.100.0 - 198.51.100.255` | IP / CIDR rules (ranges become the covering CIDRs) |
+| `*.brand.{com,jp}`, `a.example.com,b.example.com` | one rule per item |
+| out-of-scope host of any type, out-of-scope `www.*.example.com` | a deny rule (mid-label wildcards as a regex) |
+| `https://api.example.com/v1/users` (a path) | **review**: scope is checked per host, so a path-limited asset is listed with a suggested rule, not imported. If the whole host is already in scope it is dropped as covered. |
+| out-of-scope `https://example.com/blog` | **review**: "do not test /blog" — a path-level exclusion the host check cannot enforce |
+| `<your-tenant>.example.com`, `app[.staging].example.com`, free text, `co.uk`, mid-label in-scope wildcards, redacted entries | **review** |
+| mobile app IDs, source code, hardware, executables | `## Other assets`, for reference |
+
+Imported bullets sit between `<!-- cbh-import:start -->` / `<!-- cbh-import:end -->`. Running the
+import again against an existing `scope.md` replaces only those blocks: rules you added by hand,
+Focus areas, and the recon-seeded hosts section are kept, and the template's `(paste …)`
+placeholders are removed. The bounty eligibility, max severity (or Intigriti tier) and program
+instruction ride along on each rule line. `--text` also extracts researcher-conduct rules (rate
+limits, required headers, automation and DoS clauses, test-account domains) into
+`## Engagement rules / safe harbor` for you to verify.
+
+Checked against every public program in bounty-targets-data (939 programs, 52,947 assets):
+97.5% of HackerOne host assets, 91% of Intigriti, 90% of YesWeHack and 68% of Bugcrowd (whose
+public dump redacts some targets) become rules; the rest are path-limited, placeholder or
+free-text entries listed for review. For all 939, every rule round-trips through
+`engine/scope.py`, every declared asset is admitted, no subdomain of an exact host is admitted,
+every deny rule rejects its host, and re-importing is a no-op.
+
+## Composition example — full engagement loop
+
+```bash
+# Day 1 — intake
+cbh scope import h1:target -o ~/Targets/target/scope.md   # then read "## Needs manual review"
+cbh recon target.com
+# → recon/target.com/RECON_SUMMARY.md
+
+# Day 2 — hunt
+# Find an interesting URL in the recon summary, classify it
+cbh classify "https://api.target.com/v1/users/42?token=abc"
+# → matches hunt-idor + hunt-api-misconfig + hunt-ssrf
+# → read docs/disclosed-reports/hunt-idor.md for the IDOR pattern library
+
+# Day 3 — validate
+# Wrote the finding up as a markdown
+cbh triage findings/idor.md
+# → PASS — eligible for report drafting
+
+# Day 4 — submit
+cbh report findings/idor.md --platform h1 --out drafts/h1-draft.md
+# Review the draft, fill in placeholders, attach evidence, submit
+```
+
+## What the CLI does NOT do
+
+- **Does not auto-attack.** It surfaces candidates and applies discipline rules. The operator runs the actual probes.
+- **Does not invent finding content.** Sections without source text become `(fill in)` placeholders.
+- **Does not bypass platform rules.** The Bugcrowd VRT mapping is left to the operator — the CLI emits the structural slot, not the choice.
+- **Does not replace the skill content.** The CLI is a router into the skill content; the skills are still where the operator-grade depth lives.
+
+## Why this exists
+
+Every other bug-bounty toolchain is either (a) a payload list with no methodology, or (b) a methodology PDF with no runner. This CLI bridges the two: it consumes the repo's skill content and produces engagement-stage outputs. The `recon → classify → triage → report` flow mirrors the 6-phase workflow that `bb-methodology` describes, with the discipline rules from `triage-validation` enforced programmatically at the triage gate.
+
+For senior pentesters: a productivity multiplier that does the boring orchestration so you stay in the interesting parts.
+
+For junior researchers: a guardrail that prevents the top three N/A-submission classes (no real HTTP test, no concrete impact, finding on never-submit list).
+
+**Choice not dogma:** operators with no Burp run curl-only; operators with Burp Pro route via `--burp`; operators with Burp + MCP drive everything from a Hermes Agent conversation. All three are first-class supported.

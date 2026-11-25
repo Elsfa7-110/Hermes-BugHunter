@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="270" viewBox="0 0 1080 270" role="img" aria-label="DeepSeek model running through Hermes Agent with the security skills library">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#08080d"/><stop offset="1" stop-color="#101a24"/></linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff2d4f"/><stop offset="1" stop-color="#4cc9f0"/></linearGradient>
+  </defs>
+  <rect width="1080" height="270" rx="18" fill="url(#bg)" stroke="#303747"/>
+  <g font-family="system-ui, sans-serif" text-anchor="middle">
+    <rect x="54" y="69" width="264" height="132" rx="12" fill="#171923" stroke="#ff2d4f" stroke-width="2"/>
+    <text x="186" y="112" font-size="13" fill="#ff758a" font-weight="700" letter-spacing="2">MODEL</text>
+    <text x="186" y="151" font-size="29" fill="#fff" font-weight="700">DeepSeek</text>
+    <text x="186" y="178" font-size="13" fill="#a6adbb">Already configured in Hermes</text>
+    <path d="M318 135 H407" stroke="url(#line)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M395 124 L408 135 L395 146" fill="none" stroke="#4cc9f0" stroke-width="3"/>
+    <rect x="408" y="69" width="264" height="132" rx="12" fill="#171923" stroke="#4cc9f0" stroke-width="2"/>
+    <text x="540" y="112" font-size="13" fill="#4cc9f0" font-weight="700" letter-spacing="2">AGENT RUNTIME</text>
+    <text x="540" y="151" font-size="29" fill="#fff" font-weight="700">Hermes Agent</text>
+    <text x="540" y="178" font-size="13" fill="#a6adbb">Tools · memory · skill discovery</text>
+    <path d="M672 135 H761" stroke="url(#line)" stroke-width="4" stroke-linecap="round"/>
+    <path d="M749 124 L762 135 L749 146" fill="none" stroke="#4cc9f0" stroke-width="3"/>
+    <rect x="762" y="69" width="264" height="132" rx="12" fill="#171923" stroke="#f6b44b" stroke-width="2"/>
+    <text x="894" y="112" font-size="13" fill="#f6b44b" font-weight="700" letter-spacing="2">SKILL LIBRARY</text>
+    <text x="894" y="151" font-size="29" fill="#fff" font-weight="700">98 Skills</text>
+    <text x="894" y="178" font-size="13" fill="#a6adbb">~/.hermes/skills/</text>
+    <text x="540" y="238" font-size="12" fill="#7f899b">Copy the skill folders only — no provider, model, or API configuration is included.</text>
+  </g>
+</svg>

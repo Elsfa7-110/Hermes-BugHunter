@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="400" viewBox="0 0 840 400" role="img" aria-label="Star history will be available after publication">
+  <rect width="840" height="400" rx="12" fill="#ffffff"/>
+  <text x="420" y="175" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#1f2328">Star history not configured</text>
+  <text x="420" y="215" text-anchor="middle" font-family="system-ui, sans-serif" font-size="15" fill="#59636e">Generate this chart after publishing the repository under its final owner/name.</text>
+</svg>
