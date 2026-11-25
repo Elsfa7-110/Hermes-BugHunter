@@ -9,7 +9,7 @@ description = "Hermes Agent bug-hunting skills, workflows, and deterministic rec
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
-authors = [{ name = "Sachin Sharma" }]
+authors = [{ name = "Elsfa7-110" }]
 keywords = ["security", "bug-bounty", "recon", "deepseek", "hermes", "pentest"]
 dependencies = []
 
