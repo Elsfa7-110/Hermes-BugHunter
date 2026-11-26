@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "deepseek-bughunter"
+name = "hermes-bughunter"
 version = "3.1.0"
 description = "Hermes Agent bug-hunting skills, workflows, and deterministic recon/triage tooling"
 readme = "README.md"
