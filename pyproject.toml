@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepseek-bughunter"
+version = "3.1.0"
+description = "Hermes Agent bug-hunting skills, workflows, and deterministic recon/triage tooling"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Elsfa7-110" }]
+keywords = ["security", "bug-bounty", "recon", "deepseek", "hermes", "pentest"]
+dependencies = []
+
+[project.optional-dependencies]
+http = ["requests"]
+
+[project.scripts]
+cbh = "cbh.cli:main"
+
+[tool.setuptools]
+packages = ["cbh"]
+
+[tool.setuptools.package-data]
+cbh = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = ["--import-mode=importlib"]
