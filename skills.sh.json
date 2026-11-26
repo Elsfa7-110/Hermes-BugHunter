@@ -1,0 +1,142 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "paths": [
+    "./skills"
+  ],
+  "groupings": [
+    {
+      "title": "Engagement workflows",
+      "skills": [
+        "autopilot",
+        "chain",
+        "hunt",
+        "intel",
+        "memory-gc",
+        "pickup",
+        "recon",
+        "remember",
+        "report",
+        "scope",
+        "surface",
+        "token-scan",
+        "triage",
+        "validate"
+      ]
+    },
+    {
+      "title": "Hunt — web app vuln classes",
+      "skills": [
+        "hunt-api-misconfig",
+        "hunt-aspnet",
+        "hunt-ato",
+        "hunt-auth-bypass",
+        "hunt-brute-force",
+        "hunt-business-logic",
+        "hunt-cache-poison",
+        "hunt-captcha-bypass",
+        "hunt-cicd",
+        "hunt-clickjacking",
+        "hunt-cloud-misconfig",
+        "hunt-cors",
+        "hunt-csrf",
+        "hunt-deserialization",
+        "hunt-dispatch",
+        "hunt-dom",
+        "hunt-exceptional-conditions",
+        "hunt-file-upload",
+        "hunt-fintech-graphql",
+        "hunt-forgot-password",
+        "hunt-graphql",
+        "hunt-grpc",
+        "hunt-host-header",
+        "hunt-html-injection",
+        "hunt-http-smuggling",
+        "hunt-idor",
+        "hunt-jwt-crypto",
+        "hunt-k8s",
+        "hunt-laravel",
+        "hunt-ldap",
+        "hunt-lfi",
+        "hunt-llm-ai",
+        "hunt-mfa-bypass",
+        "hunt-misc",
+        "hunt-nextjs",
+        "hunt-nodejs",
+        "hunt-nosqli",
+        "hunt-ntlm-info",
+        "hunt-oauth",
+        "hunt-open-redirect",
+        "hunt-race-condition",
+        "hunt-rag-vector",
+        "hunt-rce",
+        "hunt-saml",
+        "hunt-session",
+        "hunt-shadow-api",
+        "hunt-sharepoint",
+        "hunt-source-leak",
+        "hunt-spa-api",
+        "hunt-springboot",
+        "hunt-sqli",
+        "hunt-ssrf",
+        "hunt-ssti",
+        "hunt-subdomain",
+        "hunt-tls-network",
+        "hunt-websocket",
+        "hunt-xss",
+        "hunt-xxe"
+      ]
+    },
+    {
+      "title": "Enterprise platform attack",
+      "skills": [
+        "apk-redteam-pipeline",
+        "cloud-iam-deep",
+        "enterprise-vpn-attack",
+        "ios-redteam-pipeline",
+        "m365-entra-attack",
+        "meme-coin-audit",
+        "okta-attack",
+        "supply-chain-attack-recon",
+        "vmware-vcenter-attack",
+        "web3-audit"
+      ]
+    },
+    {
+      "title": "Recon & OSINT",
+      "skills": [
+        "offensive-osint",
+        "osint-methodology",
+        "recon-scope-triage",
+        "security-arsenal",
+        "web2-recon"
+      ]
+    },
+    {
+      "title": "Methodology & mindset",
+      "skills": [
+        "bb-local-toolkit",
+        "bb-methodology",
+        "bug-bounty",
+        "redteam-mindset"
+      ]
+    },
+    {
+      "title": "Reporting & validation",
+      "skills": [
+        "bugcrowd-reporting",
+        "evidence-hygiene",
+        "mid-engagement-ir-detection",
+        "redteam-report-template",
+        "report-writing",
+        "triage-validation"
+      ]
+    },
+    {
+      "title": "Other",
+      "skills": [
+        "exploit-completion"
+      ]
+    }
+  ]
+}

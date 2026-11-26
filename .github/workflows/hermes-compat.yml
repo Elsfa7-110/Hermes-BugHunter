@@ -1,0 +1,62 @@
+name: hermes-compat
+
+# Hermes-specific gates. The same bundle installed twice (or next to another
+# bug-bounty bundle) produces ambiguous skill names: skill_view refuses the
+# bare name and no /command is registered. scripts/hermes_compat.py mirrors the
+# loader rules so that class of breakage fails CI instead of a user's session.
+
+on:
+  pull_request:
+    paths:
+      - "skills/**"
+      - "scripts/hermes_compat.py"
+      - "scripts/hermes_install.py"
+      - "tests/test_hermes_compat.py"
+      - "tests/test_hermes_install.py"
+      - "tests/test_smoke_prompts.py"
+      - "tests/smoke-test-prompts.md"
+      - ".github/workflows/hermes-compat.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skills/**"
+      - "scripts/hermes_compat.py"
+      - "scripts/hermes_install.py"
+      - ".github/workflows/hermes-compat.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compat:
+    name: Hermes loader rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Bundle resolves under Hermes' alias rules
+        run: python3 scripts/hermes_compat.py
+
+      - name: Installer round-trip (clean destination)
+        run: |
+          dest="$(mktemp -d)/skills"
+          python3 scripts/hermes_install.py --dest "$dest" --json > install.json
+          python3 scripts/check_install_report.py install.json 98
+
+      - name: Installer detects a deliberate collision
+        run: |
+          dest="$(mktemp -d)/skills"
+          mkdir -p "$dest/other-bundle/hunt-xss"
+          printf -- '---\nname: hunt-xss\ndescription: other bundle\n---\n' > "$dest/other-bundle/hunt-xss/SKILL.md"
+          python3 scripts/hermes_install.py --dest "$dest" --json > collide.json
+          python3 scripts/check_install_report.py collide.json 98 --expect-collision hunt-xss:hermes-bughunter/hunt-xss
+
+      - name: Hermes-facing unittests
+        run: |
+          pip install pytest
+          python3 -m pytest tests/test_hermes_compat.py tests/test_hermes_install.py tests/test_smoke_prompts.py -q

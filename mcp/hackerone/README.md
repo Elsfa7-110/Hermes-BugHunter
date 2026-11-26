@@ -22,7 +22,7 @@ This MCP server is optional. Copying the `skills/` directory is sufficient to us
 To expose the public HackerOne tools to Hermes, add a local stdio server (replace the example path with the absolute path on your machine):
 
 ```bash
-hermes mcp add hackerone --command python3 --args /absolute/path/to/DeepSeek-BugHunter/mcp/hackerone/server.py
+hermes mcp add hackerone --command python3 --args /absolute/path/to/Hermes-BugHunter/mcp/hackerone/server.py
 ```
 
 For account-specific tools, set `HACKERONE_API_USERNAME` and `HACKERONE_API_TOKEN` in the environment available to Hermes, then restart the session. Alternatively, configure the server in `~/.hermes/config.yaml`:
@@ -31,7 +31,7 @@ For account-specific tools, set `HACKERONE_API_USERNAME` and `HACKERONE_API_TOKE
 mcp_servers:
   hackerone:
     command: "python3"
-    args: ["/absolute/path/to/DeepSeek-BugHunter/mcp/hackerone/server.py"]
+    args: ["/absolute/path/to/Hermes-BugHunter/mcp/hackerone/server.py"]
     env:
       HACKERONE_API_USERNAME: "<your username>"
       HACKERONE_API_TOKEN: "<your read-only token>"

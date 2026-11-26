@@ -1,6 +1,6 @@
 ---
 name: autopilot
-description: "Run autonomous hunt loop on a target — scope check → recon → rank surface → hunt → validate → report with configurable checkpoints. Usage: /autopilot target.com [--paranoid|--normal|--yolo]"
+description: "Autonomous hunt loop: scope→recon→hunt→report. Usage: /autopilot target.com [--paranoid|--normal|--yolo]"
 sources: ["commands/autopilot.md"]
 ---
 
@@ -20,7 +20,7 @@ Autonomous hunt loop with deterministic scope safety and configurable checkpoint
 
 ## Session Isolation (Important)
 
-**Start a fresh Hermes session per target with your configured DeepSeek model.** Hermes sessions retain conversation context —
+**Start a fresh Hermes session per target with your configured model.** Hermes sessions retain conversation context —
 testing multiple targets in one session causes cross-contamination where findings, payloads,
 and tech stack assumptions from target A bleed into target B.
 

@@ -1,0 +1,12 @@
+# Hermes skill bundle: start a new target.
+# Copy to $HERMES_HOME/skill-bundles/ and invoke as /bughunt-start example.com
+name: bughunt-start
+description: Start a target — methodology, scope check, recon, ranked surface.
+skills:
+  - bb-methodology
+  - scope
+  - recon
+  - surface
+instruction: |
+  Run the phases in order. If the scope check fails for any asset, stop and
+  report the asset as out of scope instead of continuing.

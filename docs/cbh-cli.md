@@ -1,4 +1,4 @@
-# `cbh` — DeepSeek BugHunter command-line tools
+# `cbh` — Hermes-BugHunter command-line tools
 
 > **Hermes skills are the primary conversational interface.** In a Hermes session, use `/recon`, `/hunt`, `/triage`, `/report`, `/validate`, `/chain`, `/autopilot`, `/scope`, and related skill commands. The skills use the model and tools already configured in your Hermes profile.
 >

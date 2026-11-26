@@ -1,5 +1,5 @@
 # Jekyll configuration for the documentation site.
-title: DeepSeek BugHunter
+title: Hermes-BugHunter
 description: Agent Skills for bug bounty research and authorized security assessments with Hermes Agent.
 remote_theme: just-the-docs/just-the-docs
 search_enabled: true
