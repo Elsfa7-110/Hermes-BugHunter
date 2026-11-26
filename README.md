@@ -1,6 +1,6 @@
-![DeepSeek BugHunter](assets/banner.jpeg)
+![Hermes BugHunter](assets/banner.jpeg)
 
-# DeepSeek BugHunter
+# Hermes BugHunter
 
 **98 Agent Skills** for bug bounty research, web application security testing, external attack-surface assessment, validation, and reporting — designed to be loaded by Hermes Agent while using the model already selected in your Hermes profile (such as DeepSeek).
 
@@ -22,8 +22,8 @@ Skills are plain `SKILL.md` directories. Hermes Agent discovers skills from `~/.
 Clone the repository and copy the bundle into Hermes' skills directory:
 
 ```bash
-git clone https://github.com/Elsfa7-110/DeepSeek-BugHunter.git
-cd DeepSeek-BugHunter
+git clone https://github.com/Elsfa7-110/Hermes-BugHunter.git
+cd Hermes-BugHunter
 bash scripts/install.sh            # add --dry-run to preview the copy
 ```
 
