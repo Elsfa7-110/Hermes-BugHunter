@@ -24,6 +24,12 @@ on:
       - "skills/**"
       - "commands/**"
       - "scripts/check_doc_counts.py"
+      - "scripts/gen_skill_catalog.py"
+      - "README.md"
+      - "docs/skills.md"
+      - "docs/architecture.md"
+      - "docs/index.md"
+      - ".github/workflows/doc-count-check.yml"
   workflow_dispatch:
 
 permissions:
