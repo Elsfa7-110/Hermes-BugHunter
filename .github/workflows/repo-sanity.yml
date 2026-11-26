@@ -1,0 +1,82 @@
+name: repo-sanity
+
+# Always-on integrity gate. Runs on EVERY pull request and push — no path
+# filters — so damage that the path-scoped workflows skip (a merge that breaks
+# pyproject.toml, conflict markers, unparsable skill frontmatter, a syntax error
+# in a script) fails before it reaches main.
+#
+# A merge of #2 left a literal ` main` line inside [project], which made
+# pyproject.toml invalid TOML: pip, pytest, and the hermes-compat job all failed
+# while the path-filtered workflows reported green. This job exists so that
+# class of breakage can be a required check.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repo-sanity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sanity:
+    name: Repo sanity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: pyproject.toml parses as TOML
+        run: |
+          python3 - <<'PY'
+          import pathlib, tomllib
+          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          project = data["project"]
+          assert project["name"], "project.name is empty"
+          assert project["version"], "project.version is empty"
+          print(f"pyproject.toml OK: {project['name']} {project['version']}")
+          PY
+
+      - name: No merge-conflict markers
+        run: |
+          # Only the conflict forms, so markdown setext underlines are not hits.
+          if git grep -n -E '^(<<<<<<< |=======$|>>>>>>> )' -- . ':!*.lock'; then
+            echo "::error::merge-conflict markers found in tracked files"
+            exit 1
+          fi
+          echo "no conflict markers"
+
+      - name: Python sources compile
+        run: |
+          python3 -m compileall -q scripts cbh engine tests
+          echo "compileall clean"
+
+      - name: JSON files parse
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+          bad, checked = [], 0
+          for path in sorted(pathlib.Path(".").rglob("*.json")):
+              if ".git" in path.parts or "node_modules" in path.parts:
+                  continue
+              checked += 1
+              try:
+                  json.loads(path.read_text(encoding="utf-8"))
+              except Exception as exc:
+                  bad.append(f"{path}: {exc}")
+          for line in bad:
+              print("::error::" + line)
+          print(f"{checked} JSON file(s) parsed" if not bad else f"{len(bad)} broken")
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: Skill frontmatter and names resolve
+        run: python3 scripts/hermes_compat.py
