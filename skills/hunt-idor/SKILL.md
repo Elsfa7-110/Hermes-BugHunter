@@ -1,6 +1,6 @@
 ---
 name: hunt-idor
-description: Hunting skill for idor vulnerabilities. Built from 26 public bug bounty reports. Use when hunting idor on any target.
+description: "IDOR/BOLA: object-level authz across APIs and UIs. Built from 26 public bug bounty reports. Use when hunting idor on any target."
 sources: github, hackerone_public
 report_count: 39
 ---

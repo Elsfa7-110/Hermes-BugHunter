@@ -1,0 +1,12 @@
+# Hermes skill bundle: external red-team engagement.
+# Copy to $HERMES_HOME/skill-bundles/ and invoke as /redteam-engagement example.com
+name: redteam-engagement
+description: External red team — mindset, mid-engagement detection, client report.
+skills:
+  - redteam-mindset
+  - mid-engagement-ir-detection
+  - redteam-report-template
+instruction: |
+  This is a client engagement, not a bug bounty: the deliverable is a
+  reproducible critical/high finding (or a chained story), and observations
+  about the client's detection and response belong in the report.

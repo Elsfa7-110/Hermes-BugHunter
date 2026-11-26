@@ -4,17 +4,29 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hermes-bughunter"
-version = "3.1.0"
-description = "Hermes Agent bug-hunting skills, workflows, and deterministic recon/triage tooling"
+version = "3.2.0"
+description = "98 Hermes Agent skills for bug bounty, web app security testing, external recon, validation, and reporting, plus deterministic cbh tooling"
+ main
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [{ name = "Elsfa7-110" }]
-keywords = ["security", "bug-bounty", "recon", "deepseek", "hermes", "pentest"]
+keywords = ["security", "bug-bounty", "recon", "agent-skills", "hermes", "pentest"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Security",
+]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Elsfa7-110/Hermes-BugHunter"
+Documentation = "https://github.com/Elsfa7-110/Hermes-BugHunter/blob/main/docs/hermes.md"
+Issues = "https://github.com/Elsfa7-110/Hermes-BugHunter/issues"
 
 [project.optional-dependencies]
 http = ["requests"]
+dev = ["pytest", "pyyaml"]
 
 [project.scripts]
 cbh = "cbh.cli:main"

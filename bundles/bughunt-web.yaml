@@ -1,0 +1,12 @@
+# Hermes skill bundle: web attack surface.
+# Copy to $HERMES_HOME/skill-bundles/ and invoke as /bughunt-web example.com
+name: bughunt-web
+description: Web/API pass — recon pipeline, OSINT arsenal, access-control classes.
+skills:
+  - web2-recon
+  - offensive-osint
+  - hunt-idor
+  - hunt-api-misconfig
+instruction: |
+  Recon first, then pick the class the surface supports. Do not load every
+  hunt-* skill; two or three targeted classes beat the whole library.

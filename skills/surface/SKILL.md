@@ -1,6 +1,6 @@
 ---
 name: surface
-description: "Show ranked attack surface for a target from its recon manifest + hunt memory. Deterministic backing is `cbh surface <target>` (reads recon/<target>/manifest.json); LLM layer adds ledger signal. Usage: /surface target.com"
+description: "Rank a target's attack surface from recon manifest. Deterministic backing is `cbh surface <target>` (reads recon/<target>/manifest.json); LLM layer adds ledger signal. Usage: /surface target.com"
 sources: ["commands/surface.md"]
 ---
 
@@ -17,7 +17,7 @@ View the prioritized attack surface for a target.
    top of the manifest's `ranked_surface` (P1/P2/Kill)
 4. Outputs P1 (start here), P2 (after P1), and Kill List (skip)
 
-> The manifest is the recon→hunt contract — see [`docs/recon-manifest.md`](../docs/recon-manifest.md).
+> The manifest is the recon→hunt contract — see [`docs/recon-manifest.md`](../../docs/recon-manifest.md).
 > Run `cbh surface <target>` for the raw deterministic ranking.
 
 ## Usage

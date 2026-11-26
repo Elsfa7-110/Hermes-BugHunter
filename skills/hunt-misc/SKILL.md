@@ -1,6 +1,6 @@
 ---
 name: hunt-misc
-description: Hunting skill for misc vulnerabilities. Built from 225 public bug bounty reports. Use when hunting misc on any target.
+description: "Catch-all paid patterns when no class skill fits. Built from 225 public bug bounty reports. Use when hunting misc on any target."
 sources: github, hackerone_public
 report_count: 225
 ---

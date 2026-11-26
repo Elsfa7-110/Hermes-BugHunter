@@ -1,0 +1,12 @@
+# Hermes skill bundle: finding to submission.
+# Copy to $HERMES_HOME/skill-bundles/ and invoke as /bughunt-report
+name: bughunt-report
+description: Validate, redact, and write up a finding for a bounty platform.
+skills:
+  - triage-validation
+  - evidence-hygiene
+  - report-writing
+  - bugcrowd-reporting
+instruction: |
+  Gate first: if any of the 7 questions fails, stop and do not write the report.
+  Redact cookies and other users' PII before capturing evidence.

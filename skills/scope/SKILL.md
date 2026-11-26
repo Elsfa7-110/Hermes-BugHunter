@@ -1,6 +1,6 @@
 ---
 name: scope
-description: "Mandatory pre-flight scope check — verify an asset is in scope BEFORE any HTTP touch. Deterministic (deny-wins, default-deny) via engine/scope.py against the engagement's scope.md. Blocks out-of-scope testing. Usage: /scope <asset> [<asset> ...]"
+description: "Pre-flight scope check, deny-wins, before any HTTP. Deterministic (deny-wins, default-deny) via engine/scope.py against the engagement's scope.md. Blocks out-of-scope testing. Usage: /scope <asset> [<asset> ...]"
 sources: ["commands/scope.md"]
 ---
 
@@ -60,7 +60,7 @@ anchored `re:^host$` rules, so no subdomain is implied. Path-limited assets,
 placeholders (`<your-tenant>.example.com`), free text and mid-label wildcards land in
 `## Needs manual review` and are **not** in scope until you move a rule up. Re-running
 the import refreshes only the `cbh-import` blocks; rules you added by hand are kept.
-See [`docs/cbh-cli.md`](../docs/cbh-cli.md).
+See [`docs/cbh-cli.md`](../../docs/cbh-cli.md).
 
 ## Rules
 
