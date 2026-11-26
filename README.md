@@ -19,19 +19,16 @@ Skills are plain `SKILL.md` directories. Hermes Agent discovers skills from `~/.
 
 ## Copy the skills into Hermes (Linux)
 
-From the extracted repository directory on Linux:
+Clone the repository and copy the bundle into Hermes' skills directory:
+
 ```bash
-cd ./hermes/skills
 git clone https://github.com/Elsfa7-110/DeepSeek-BugHunter.git
+cd DeepSeek-BugHunter
+bash scripts/install.sh            # add --dry-run to preview the copy
 ```
-Start a new Hermes session
 
-An optional copy-only helper is also included:
-
-```bash
-bash scripts/install.sh --dry-run
-bash scripts/install.sh
-```
+Start a new Hermes session. To copy by hand instead:
+`mkdir -p ~/.hermes/skills && cp -a skills/. ~/.hermes/skills/`.
 
 The helper copies only the `skills/` directory to `~/.hermes/skills/`. It does not install Hermes, change model settings, or write credentials.
 

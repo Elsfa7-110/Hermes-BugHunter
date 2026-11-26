@@ -63,8 +63,9 @@ node_modules/
 .pytest_cache/
 *.log
 
-# Local cbh recon outputs (when run from repo root)
-recon/
+# Local cbh recon outputs (when run from repo root). Anchored: an unanchored
+# `recon/` also ignored skills/recon/, silently dropping the /recon skill.
+/recon/
 
 # Maintainer-only plaintext client-identifier denylist (never commit names)
 scripts/.identifier-denylist.local

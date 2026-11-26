@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""
+check_doc_counts.py — fail when counts stated in the docs no longer match disk.
+
+The bundle's headline numbers ("98 Agent Skills", "58 hunt-* skills", the
+per-section counts in docs/skills.md) drift whenever a skill directory is added,
+renamed, or removed. CI runs this so a stale number is caught before merge.
+
+Checks:
+  1. skills/       — directories containing a SKILL.md (the real skill count)
+  2. commands/     — *.md workflow descriptions
+  3. README.md, docs/index.md, docs/architecture.md — stated counts
+  4. docs/skills.md — stated total, per-section "(N)" headers, row count, and
+     that every skill on disk appears exactly once in the catalog tables
+
+Stdlib only, deterministic. Exit 0 when everything agrees, 1 otherwise.
+"""
+from __future__ import annotations
+
+import os
+import re
+import sys
+
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SKILLS_DIR = os.path.join(REPO, "skills")
+COMMANDS_DIR = os.path.join(REPO, "commands")
+
+failures: list[str] = []
+
+
+def read(path: str) -> str | None:
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return fh.read()
+    except OSError:
+        return None
+
+
+def claim(label: str, pattern: str, text: str | None, expected: int,
+          path: str, *, group: int = 1):
+    """Assert every match of `pattern` states `expected`."""
+    if text is None:
+        failures.append(f"{path}: file is missing")
+        return
+    matches = re.findall(pattern, text)
+    if not matches:
+        failures.append(f"{path}: could not find the {label} claim "
+                        f"(pattern {pattern!r}) — update the doc or this checker")
+        return
+    for raw in matches:
+        value = raw if isinstance(raw, str) else raw[group - 1]
+        if int(value) != expected:
+            failures.append(f"{path}: {label} says {value}, disk has {expected}")
+
+
+def main() -> int:
+    if not os.path.isdir(SKILLS_DIR):
+        print(f"[error] no skills/ directory at {SKILLS_DIR}", file=sys.stderr)
+        return 1
+
+    skills = sorted(
+        d for d in os.listdir(SKILLS_DIR)
+        if os.path.isfile(os.path.join(SKILLS_DIR, d, "SKILL.md"))
+    )
+    hunt = [s for s in skills if s.startswith("hunt-")]
+    commands = sorted(
+        f[:-3] for f in os.listdir(COMMANDS_DIR) if f.endswith(".md")
+    ) if os.path.isdir(COMMANDS_DIR) else []
+    n_skills, n_hunt = len(skills), len(hunt)
+
+    print(f"disk: {n_skills} skill(s), {n_hunt} hunt-*(s), {len(commands)} command(s)")
+
+    claim("skill count", r"\*\*(\d+) Agent Skills\*\*",
+          read(os.path.join(REPO, "README.md")), n_skills, "README.md")
+    claim("skill directory count", r"all (\d+) skill directories",
+          read(os.path.join(REPO, "README.md")), n_skills, "README.md")
+    claim("hunt-* count", r"\*\*(\d+) `hunt-\*` skills\*\*",
+          read(os.path.join(REPO, "README.md")), n_hunt, "README.md")
+    claim("skill count", r"\*\*(\d+) Agent Skills\*\*",
+          read(os.path.join(REPO, "docs", "index.md")), n_skills, "docs/index.md")
+    arch = read(os.path.join(REPO, "docs", "architecture.md"))
+    claim("skill count", r"contains \*\*(\d+) skills\*\*", arch, n_skills,
+          "docs/architecture.md")
+    claim("hunt-* count", r"including \*\*(\d+) `hunt-\*` skills\*\*", arch, n_hunt,
+          "docs/architecture.md")
+
+    catalog_path = os.path.join(REPO, "docs", "skills.md")
+    catalog = read(catalog_path)
+    claim("skill count", r"All \*\*(\d+) skills\*\*", catalog, n_skills,
+          "docs/skills.md")
+    if catalog is not None:
+        section_counts = [int(n) for n in re.findall(r"^## .+ \((\d+)\)\s*$",
+                                                     catalog, re.M)]
+        if section_counts and sum(section_counts) != n_skills:
+            failures.append(f"docs/skills.md: section counts sum to "
+                            f"{sum(section_counts)}, disk has {n_skills}")
+        listed = re.findall(r"^\| `([^`]+)` \|", catalog, re.M)
+        if len(listed) != len(set(listed)):
+            dupes = sorted({n for n in listed if listed.count(n) > 1})
+            failures.append(f"docs/skills.md: duplicate catalog rows: {', '.join(dupes)}")
+        missing = sorted(set(skills) - set(listed))
+        extra = sorted(set(listed) - set(skills))
+        if missing:
+            failures.append("docs/skills.md: skills on disk but not in the catalog: "
+                            + ", ".join(missing))
+        if extra:
+            failures.append("docs/skills.md: catalog entries with no skill directory: "
+                            + ", ".join(extra))
+
+    if failures:
+        print(f"\n{len(failures)} doc-count problem(s):", file=sys.stderr)
+        for f in failures:
+            print(f"  - {f}", file=sys.stderr)
+        print("\nFix the docs (or regenerate: python3 scripts/gen_skill_catalog.py).",
+              file=sys.stderr)
+        return 1
+    print("doc counts OK — every stated count matches disk.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
