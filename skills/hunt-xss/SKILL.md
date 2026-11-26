@@ -7,6 +7,8 @@ report_count: 174
 
 ## Autonomous Testing Priority
 
+**Send the Additional payload set FIRST.** Fixed scan order: (1) the five Additional payloads (step 1 below), (2) inline `<script>`, (3) attribute/handler injection, (4) SVG/mXSS combos, (5) scheme payloads `javascript:` / `java%09script:` / `JaVaScRiPt:` / `jav%61script:` / `data:text/html` **last**. Never open a scan with a scheme payload like `java%09script:document.title='XSS` or a bare `<script>` probe — those are the most-filtered shapes, so starting there makes a live sink look dead.
+
 **Verify reflection before claiming XSS — encoding is everything.**
 
 Your payload must appear in the response body with angle brackets UNESCAPED. `<script>` is XSS. `&lt;script&gt;` is safe encoding — not vulnerable.

