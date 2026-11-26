@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "hermes-bughunter"
 version = "3.2.0"
 description = "98 Hermes Agent skills for bug bounty, web app security testing, external recon, validation, and reporting, plus deterministic cbh tooling"
+ main
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }

@@ -1,6 +1,6 @@
-![Hermes-BugHunter](assets/banner.jpeg)
+![Hermes BugHunter](assets/banner.jpeg)
 
-# Hermes-BugHunter
+# Hermes BugHunter
 
 **98 Agent Skills** for bug bounty research, web application security testing, external attack-surface assessment, validation, and reporting — built to be loaded by Hermes Agent with whatever model your profile already uses.
 
@@ -24,7 +24,7 @@ Requirements: Hermes Agent, `git`, `python3` (stdlib only — no pip install for
 ```bash
 git clone https://github.com/Elsfa7-110/Hermes-BugHunter.git
 cd Hermes-BugHunter
-bash scripts/install.sh
+bash scripts/install.sh            # add --dry-run to preview the copy
 ```
 
 The installer:
