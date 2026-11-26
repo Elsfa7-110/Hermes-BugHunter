@@ -12,6 +12,7 @@
 #   bash scripts/install.sh --force          # replace changed skill dirs
 #   bash scripts/install.sh --dry-run
 #   bash scripts/install.sh --uninstall
+cp -r /root/Hermes-BugHunter /root/.hermes/skills
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
